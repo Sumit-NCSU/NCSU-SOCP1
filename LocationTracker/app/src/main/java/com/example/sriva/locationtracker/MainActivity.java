@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
         provider = locationManager.getBestProvider(criteria, false);
         //tracking button is disabled until user enters name.
         trackingButton.setEnabled(false);
+        //set focus on the username input
+        nameView.requestFocus();
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(final Location location) {
@@ -175,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void resetResults(View view) {
-        resultView.setText("");
+        resultView.setText(""); hostField.setText(getResources().getString(R.string.default_host_name));
     }
 
     public void updateLocation(Location location) {
