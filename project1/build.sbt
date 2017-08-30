@@ -13,4 +13,4 @@ libraryDependencies += guice
 libraryDependencies += javaJdbc
 libraryDependencies += "org.xerial" % "sqlite-jdbc" % "3.8.6"
 
-herokuAppName in Compile := "boiling-ravine-25465"
+herokuAppName in Compile := "location-server-9x"
