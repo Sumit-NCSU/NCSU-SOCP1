@@ -18,6 +18,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -38,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
     static final int PERMISSION_ALL = 1;
     String[] PERMISSIONS = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-    private TextView hostField;
-    private TextView nameView;
+    private EditText hostField;
+    private EditText nameField;
     private TextView resultView;
     private ToggleButton trackingButton;
     private LocationManager locationManager;
@@ -51,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        hostField = (TextView) findViewById(R.id.editText);
-        nameView = (TextView) findViewById(R.id.editText2);
+        hostField = (EditText) findViewById(R.id.editText);
+        nameField = (EditText) findViewById(R.id.editText2);
         resultView = (TextView) findViewById(R.id.textView);
         trackingButton = (ToggleButton) findViewById(R.id.toggleButton);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -65,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         //tracking button is disabled until user enters name.
         trackingButton.setEnabled(false);
         //set focus on the username input
-        nameView.requestFocus();
+        nameField.requestFocus();
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(final Location location) {
@@ -86,11 +87,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(appLogName, "provider disabled: " + provider);
             }
         };
-        nameView.addTextChangedListener(new TextWatcher() {
+        nameField.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {}
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (String.valueOf(nameView.getText()).length() == 0) {
+                if (String.valueOf(nameField.getText()).length() == 0) {
                     trackingButton.setEnabled(false);
                 } else {
                     trackingButton.setEnabled(true);
@@ -112,12 +113,16 @@ public class MainActivity extends AppCompatActivity {
                     if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         //register the Location Listener with Location Manager
                         //Location change min 1 mt. requests every 1000 milliseconds.
-                        locationManager.requestLocationUpdates(provider, 5000, 1, locationListener);
+                        locationManager.requestLocationUpdates(provider, 1000, 1, locationListener);
                     }
+                    hostField.setEnabled(false);
+                    nameField.setEnabled(false);
                 } else {
                     resultView.setText(oldResult.concat("\nStopped Tracking"));
                     //Un-registering Location Listener.
                     locationManager.removeUpdates(locationListener);
+                    hostField.setEnabled(true);
+                    nameField.setEnabled(true);
                 }
             }
         });
@@ -185,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
         double longitude = location.getLongitude();
         Log.i(appLogName, "location Changed New Location is: " + "Latitude: " + latitude + " Longitude: " + longitude);
         if (trackingButton.isChecked()) {
-            String username = String.valueOf(nameView.getText());
+            String username = String.valueOf(nameField.getText());
             Log.i(appLogName,"Posting Request for: " + username + ", at Location: " + location.toString());
             //sending data to the server.
             postRequestToServer(location, username);
