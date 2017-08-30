@@ -1,4 +1,4 @@
-name := """project1"""
+name := """location-server"""
 organization := "com.soc"
 
 version := "1.0-SNAPSHOT"
