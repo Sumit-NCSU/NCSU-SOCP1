@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
         //This is used when connected with Real Device on same Wifi as the laptop.
 //        host = "192.168.42.34:9000";
         // This is the server deployed on Heroku
-        host = "location-server-9x";
+//        host = "location-server-9x.herokuapp.com";
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "http://" + host + "/locationupdate";
         Log.i(appLogName, "The server URL is: " + url);
