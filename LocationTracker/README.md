@@ -8,6 +8,8 @@
 * Enter your name in the `username` field in the android application.
   * Username is mandatory. If the username is not given then the `Start Tracking` button will be disabled.
 * Press the toggle button labeled `Start tracking` to start sending the location data to the server.
+  * `Start Tracking` will also disable the host and username fields so that the user cannot change them in between.
 * The response from the server will be displayed on the application screen on the bottom half.
 * Clicking on the toggle button which now says `Stop Tracking` will stop the location tracking and will stop sending the data to the server.
+  * `Stop Tracking` will enable the host and username fields so that the user can change them again.
 * The `Reset` button will reset the host name and also clear the bottom half of the application screen where results are displayed.
