@@ -1,12 +1,12 @@
 package util;
 
 /**
- * @author sriva
+ * code referenced for calculating distance: https://github.com/jasonwinn/haversine/blob/master/Haversine.java
  *
  */
 public class DistanceUtil {
 
-	private static final int EARTH_RADIUS = 6371;
+	private static final int EARTH_RADIUS = 6371; // Km
 
 	public static double findDistance(double startLat, double startLong, double endLat, double endLong) {
 		double dLat = Math.toRadians((endLat - startLat));

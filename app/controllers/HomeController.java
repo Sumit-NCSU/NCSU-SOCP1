@@ -36,7 +36,7 @@ public class HomeController extends Controller {
 		if (json == null) {
 			return badRequest("Expecting Json data");
 		} else {
-			String name = json.findPath("name").textValue();
+			String name = json.findPath("username").textValue();
 			long timestamp = json.findPath("timestamp").longValue();
 			double latitude = json.findPath("latitude").doubleValue();
 			double longitude = json.findPath("longitude").doubleValue();

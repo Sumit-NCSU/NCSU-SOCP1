@@ -25,23 +25,35 @@ public class DatabaseService {
 	// public CompletionStage<Void> updateLocation(LocationData currentLocation) {
 	public double updateLocation(LocationData currentLocation) {
 		// return CompletableFuture.runAsync(() -> {
-		Connection con = db.getConnection();
-		String sql = "CREATE TABLE IF NOT EXISTS location (id integer PRIMARY KEY, name text NOT NULL, latitude real, longitude real, timestamp integer)";
-		try (Statement stmt = con.createStatement()) {
-			stmt.execute(sql);
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
-		insertRecord(currentLocation, con);
-		LocationData initialLocation = getStartLocation(currentLocation.getName(), con);
-		if (initialLocation == null) {
+		Connection con = null;
+		try {
+			con = db.getConnection();
+			String sql = "CREATE TABLE IF NOT EXISTS location (id integer PRIMARY KEY, name text NOT NULL, latitude real, longitude real, timestamp integer)";
+			try (Statement stmt = con.createStatement()) {
+				stmt.execute(sql);
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+			}
+			insertRecord(currentLocation, con);
+			LocationData initialLocation = getStartLocation(currentLocation.getName(), con);
+			if (initialLocation == null) {
+				return 0;
+			} else {
+				double d = DistanceUtil.findDistance(initialLocation.getLatitude(), initialLocation.getLongitude(),
+						currentLocation.getLatitude(), currentLocation.getLongitude());
+				return d;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 			return 0;
-		} else {
-			double d = DistanceUtil.findDistance(initialLocation.getLatitude(), initialLocation.getLongitude(),
-					currentLocation.getLatitude(), currentLocation.getLongitude());
-			return d;
+		} finally {
+			if (con != null)
+				try {
+					con.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 		}
-		// }, executionContext);
 	}
 
 	private void insertRecord(LocationData currentLocation, Connection con) {
