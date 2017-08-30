@@ -107,15 +107,20 @@ public class MainActivity extends AppCompatActivity {
                 String oldResult = String.valueOf(resultView.getText());
                 if (isChecked) {
                     resultView.setText(oldResult.concat("\nStarted Tracking"));
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        //register the Location Listener with Location Manager
+                        //Location change min 1 mt. requests every 1000 milliseconds.
+                        locationManager.requestLocationUpdates(provider, 5000, 1, locationListener);
+                    }
                 } else {
                     resultView.setText(oldResult.concat("\nStopped Tracking"));
+                    //Un-registering Location Listener.
+                    locationManager.removeUpdates(locationListener);
                 }
             }
         });
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-        } else {
-            checkPermissions();
         }
     }
 
@@ -130,24 +135,27 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    protected void checkPermissions() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && trackingButton.isChecked()) {
             //register the Location Listener with Location Manager
-            //Location change min 1 mt. requests every 1000 milliseconds.
             locationManager.requestLocationUpdates(provider, 5000, 1, locationListener);
-            Location location = locationManager.getLastKnownLocation(provider);
-//            if (location != null) {
-//                updateLocation(location);
-//            } else {
-//                Log.i(appLogName, "Location not found!");
-//            }
         }
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        checkPermissions();
+    protected void onPause() {
+        super.onPause();
+        //Un-registering Location Listener.
+        locationManager.removeUpdates(locationListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //Un-registering Location Listener.
+        locationManager.removeUpdates(locationListener);
     }
 
     @Override
@@ -159,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(appLogName, "resuming...");
                     onResume();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Permission Denied!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Permission(s) Denied!", Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:
@@ -175,10 +183,8 @@ public class MainActivity extends AppCompatActivity {
         double longitude = location.getLongitude();
         Log.i(appLogName, "location Changed New Location is: " + "Latitude: " + latitude + " Longitude: " + longitude);
         if (trackingButton.isChecked()) {
-//            String oldResult = String.valueOf(resultView.getText());
             String username = String.valueOf(nameView.getText());
             Log.i(appLogName,"Posting Request for: " + username + ", at Location: " + location.toString());
-//            resultView.setText(oldResult + "\nLatitude: " + latitude + "Longitude: " + longitude);
             //sending data to the server.
             postRequestToServer(location, username);
         }
@@ -186,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void postRequestToServer(Location location, String username) {
         String host = String.valueOf(hostField.getText());
-        //This is used when connecting to Real Device.
+        //This is used when connected with Real Device on same Wifi as the laptop.
 //        host = "192.168.42.34:9000";
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "http://" + host + "/locationupdate";
