@@ -10,4 +10,4 @@
 * Press the toggle button labeled `Start tracking` to start sending the location data to the server.
 * The response from the server will be displayed on the application screen on the bottom half.
 * Clicking on the toggle button which now says `Stop Tracking` will stop the location tracking and will stop sending the data to the server.
-* The `Reset` button will clear the bottom half of the application screen where results are displayed.
+* The `Reset` button will reset the host name and also clear the bottom half of the application screen where results are displayed.
