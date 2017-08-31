@@ -40,7 +40,7 @@ public class HomeController extends Controller {
 			long timestamp = json.findPath("timestamp").longValue();
 			double latitude = json.findPath("latitude").doubleValue();
 			double longitude = json.findPath("longitude").doubleValue();
-			LocationData currentLocation = new LocationData(name, timestamp, latitude, longitude);
+			LocationData currentLocation = new LocationData(name, timestamp, latitude, longitude, 0);
 			// save to DB.
 			double distance = databaseService.updateLocation(currentLocation);
 			ObjectNode result = Json.newObject();
@@ -48,7 +48,7 @@ public class HomeController extends Controller {
 			result.put("distance", distance);
 			if (name == null) {
 				result.removeAll();
-				result.put("status", "Missing parameter [name]");
+				result.put("status", "Missing parameter [username]");
 				return badRequest(result);
 			} else {
 				return ok(result);

@@ -28,21 +28,21 @@ public class DatabaseService {
 		Connection con = null;
 		try {
 			con = db.getConnection();
-			String sql = "CREATE TABLE IF NOT EXISTS location (id integer PRIMARY KEY, name text NOT NULL, latitude real, longitude real, timestamp integer)";
+			String sql = "CREATE TABLE IF NOT EXISTS location (id integer PRIMARY KEY, name text NOT NULL, latitude real, longitude real, timestamp integer, distance real)";
 			try (Statement stmt = con.createStatement()) {
 				stmt.execute(sql);
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
 			}
-			insertRecord(currentLocation, con);
-			LocationData initialLocation = getStartLocation(currentLocation.getName(), con);
-			if (initialLocation == null) {
-				return 0;
-			} else {
-				double d = DistanceUtil.findDistance(initialLocation.getLatitude(), initialLocation.getLongitude(),
-						currentLocation.getLatitude(), currentLocation.getLongitude());
-				return d;
+			LocationData initialLocation = getPreviousLocation(currentLocation.getName(), con);
+			double d = 0.0;
+			if (initialLocation != null && initialLocation.getName() != null) {
+				d = initialLocation.getDistance() + DistanceUtil.findDistance(initialLocation.getLatitude(),
+						initialLocation.getLongitude(), currentLocation.getLatitude(), currentLocation.getLongitude());
 			}
+			currentLocation.setDistance(d);
+			insertRecord(currentLocation, con);
+			return d;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 0;
@@ -57,20 +57,21 @@ public class DatabaseService {
 	}
 
 	private void insertRecord(LocationData currentLocation, Connection con) {
-		String sql = "INSERT INTO location (name, latitude, longitude, timestamp) VALUES(?,?,?,?)";
+		String sql = "INSERT INTO location (name, latitude, longitude, timestamp, distance) VALUES(?,?,?,?,?)";
 		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 			pstmt.setString(1, currentLocation.getName());
 			pstmt.setDouble(2, currentLocation.getLatitude());
 			pstmt.setDouble(3, currentLocation.getLongitude());
 			pstmt.setLong(4, currentLocation.getTimestamp());
+			pstmt.setDouble(5, currentLocation.getDistance());
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
 	}
 
-	private LocationData getStartLocation(String name, Connection con) {
-		String sql = "SELECT name, timestamp, latitude, longitude FROM location WHERE name = ? order by id limit 1";
+	private LocationData getPreviousLocation(String name, Connection con) {
+		String sql = "SELECT name, timestamp, latitude, longitude, distance FROM location WHERE name = ? order by id desc limit 1";
 		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 			pstmt.setString(1, name);
 			ResultSet rs = pstmt.executeQuery();
@@ -80,6 +81,7 @@ public class DatabaseService {
 				location.setTimestamp(rs.getLong("timestamp"));
 				location.setLatitude(rs.getDouble("latitude"));
 				location.setLongitude(rs.getDouble("longitude"));
+				location.setDistance(rs.getDouble("distance"));
 			}
 			return location;
 		} catch (SQLException e) {
